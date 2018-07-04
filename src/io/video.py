@@ -1,5 +1,9 @@
-import numpy as np
+"""
+Video in/out utility.
+"""
+
 import cv2
+import numpy as np
 
 class VideoStream(object):
   """Represents a video being streamed in from a camera."""

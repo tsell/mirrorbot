@@ -21,11 +21,13 @@ class BaseDetector(object):
     logging.info('Computing keypoints')
     raise NotImplementedError()
 
+  def frameProcessor(self, frame):
+    return cv2.drawKeypoints(frame, self.getFeatures(frame), outImage=None, color=(0,255,0), flags=0)
+
   def drawFeatures(self, cvImg):
     """
     Displays the image with features highlighted.
     """
-    output_image = cv2.drawKeypoints(cvImg, self.getFeatures(cvImg), outImage=None, color=(0,255,0), flags=0)
-    cv2.imshow("Keypoints!", output_image)
+    cv2.imshow("Keypoints!", self.frameProcessor(frame))
     logging.info('Displayed keypoints.')
     cv2.waitKey(0)

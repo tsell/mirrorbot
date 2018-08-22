@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import Queue
+import queue
 from threading import Thread
 
 
@@ -12,7 +12,7 @@ class FrameProcessorThread(Thread):
       input_queue):
     super(FrameProcessorThread, self).__init__()
     self.input_queue = input_queue
-    self.output_queue = Queue.Queue()
+    self.output_queue = queue.Queue()
     self.frame_processor_func = frame_processor_func
 
   def run(self):
@@ -25,7 +25,7 @@ class FrameProcessorThread(Thread):
       try:
         # Wait for the queue to be nonempty.
         frame_idx, input_frame = self.input_queue.get(block=True, timeout=60)
-      except Queue.Empty e:
+      except queue.Empty as e:
         print("Input queue was empty.")
         break;
       output_frame = self.frame_processor_func(frame)
@@ -40,7 +40,7 @@ class BufferedVideoProcessor(object):
 
   def __init__(self, video_stream, functions, buffer_capacity = 12):
     self._video_stream = video_stream
-    self._input_queue = Queue.Queue(buffer_capacity)
+    self._input_queue = queue.Queue(buffer_capacity)
 
     # Build a chain of frame processors.
     last_queue = self._input_queue

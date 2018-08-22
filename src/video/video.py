@@ -18,14 +18,17 @@ class VideoStream(object):
     
     Args:
       image_path: if set, write the frame to this file.
+      display: if True, display the captured frame in X.
+      frame_processor: if set, call frame_processor(frame, frame_idx) on the frame.
     Returns: the frame captured, as a numpy matrix.
     """
     # Read in a single frame.
     ret, frame = self.video_in.read()
-    if frame_processor is not None:
-        frame = frame_processor(frame)
+    if ret:
+      frame_idx = int(self.video_in.get(cv2.CAP_PROP_POS_FRAMES))
+      if frame_processor is not None:
+          frame = frame_processor(frame, frame_idx)
 
-    if ret==True:
       # Reverse the frame along the Y-axis so it's like
       # looking in a mirror.
       frame = cv2.flip(frame,1)
@@ -39,7 +42,7 @@ class VideoStream(object):
     else:
       raise RuntimeException("Video input disconnected.")
  
-    return frame
+    return frame, frame_idx
 
   def captureVideo(self,
      output_file='output.avi',
@@ -50,7 +53,7 @@ class VideoStream(object):
     Args:
       output_file: if set, write the video output to this file.
       resolution: resolution to save the video output at.
-      frame_processor: a function which processes frames.
+      frame_processor: a function(frame, frame_idx) which processes frames.
     """
 
     # Define the codec and the output writer.

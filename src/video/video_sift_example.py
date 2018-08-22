@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from video import video
+from video.video import VideoStream
 from features import sift
 
 import argparse
@@ -13,7 +13,7 @@ def monoChromeFrameProcessor(cvImg):
   return im_bw
 
 def main():
-  v = video.VideoStream()
+  v = VideoStream()
   v.captureVideo(frame_processor=sift.SIFT().frameProcessor)
   del v
 

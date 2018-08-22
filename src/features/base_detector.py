@@ -2,6 +2,7 @@
 Base class for feature detectors.
 """
 
+import matplotlib.pyplot as plt
 import cv2
 
 import logging
@@ -28,6 +29,7 @@ class BaseDetector(object):
     """
     Displays the image with features highlighted.
     """
-    cv2.imshow("Keypoints!", self.frameProcessor(frame))
+    plt.imshow(self.frameProcessor(cvImg))
+    plt.show()
     logging.info('Displayed keypoints.')
     cv2.waitKey(0)

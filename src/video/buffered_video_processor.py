@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 
 import queue
-from threading import Thread
+from multiprocessing import Process, Queue
 
-
-class FrameProcessorThread(Thread):
+class FrameProcessor(Process):
   """A thread which processes frames from one queue
   and puts them into another queue."""
   def __init__(self,
       frame_processor_func,
       input_queue):
-    super(FrameProcessorThread, self).__init__()
+    super(FrameProcessor, self).__init__()
     self.input_queue = input_queue
-    self.output_queue = queue.Queue()
+    self.output_queue = Queue()
     self.frame_processor_func = frame_processor_func
 
   def run(self):
@@ -40,19 +39,19 @@ class BufferedVideoProcessor(object):
 
   def __init__(self, video_stream, functions, buffer_capacity = 12):
     self._video_stream = video_stream
-    self._input_queue = queue.Queue(buffer_capacity)
+    self._input_queue = Queue(buffer_capacity)
 
     # Build a chain of frame processors.
     last_queue = self._input_queue
     self._threads = []
     for func in functions:
-      thread = FrameProcessorThread(func, last_queue)
-      self._threads.append(thread)
-      last_queue = thread.output_queue
+      proc = FrameProcessor(func, last_queue)
+      self._subprocessess.append(proc)
+      last_queue = proc.output_queue
 
     self._output_queue = last_queue
   
-  def process(self,
+  def update(self,
       frame_processor_func = lambda frame: frame,
       max_frames = None):
     """Read frames, store in input queue, and run

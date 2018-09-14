@@ -43,14 +43,20 @@ class VideoStream(object):
     # How many frames?
     self.num_frames = args['num_frames']
 
-    # Define video codec and output writer.
+    # Define video codec and output writers.
     if self.record:
       fourcc = cv2.VideoWriter_fourcc(*'MJPG')
       resolution = (self.width, self.height)
-      _, output_file = tempfile.mkstemp(
-          prefix='output', suffix='.avi', dir=args['output_dir'])
-      self.video_out = cv2.VideoWriter(output_file, fourcc, 12.0, resolution)
-      log.info('Recording enabled to file: %s' % output_file)
+      _, prior_output_file = tempfile.mkstemp(
+          prefix='prior_output', suffix='.avi', dir=args['output_dir'])
+      _, prediction_output_file = tempfile.mkstemp(
+          prefix='prediction_output', suffix='.avi', dir=args['output_dir'])
+      self.prior_video_out = cv2.VideoWriter(
+          prior_output_file, fourcc, 12.0, resolution)
+      self.prediction_video_out = cv2.VideoWriter(
+          prediction_output_file, fourcc, 12.0, resolution)
+      log.info('Input recording enabled to file: %s' % prior_output_file)
+      log.info('Prediction recording enabled to file: %s' % prediction_output_file)
 
     # Keep three frames in the buffer.
     self._frame_queue = Queue(maxsize=args['frame_buffer_size'])
@@ -61,7 +67,7 @@ class VideoStream(object):
       self.proc.terminate()
       self.proc.join()
       if self.record:
-        self.video_out.relase()
+        self.prior_video_out.relase()
     cv2.destroyAllWindows()
 
   def start(self):
@@ -131,10 +137,16 @@ class VideoStream(object):
     idx, last_frame = self._frame_queue.get(block=True)
     log.debug('Got frome %d from queue.' % idx)
     if self.display:
-      cv2.imshow('frame', last_frame)
+      cv2.imshow('prior frame', last_frame)
     if self.record:
-      self.video_out.write(last_frame)
+      self.prior_video_out.write(last_frame)
     return idx, last_frame
+
+  def record_prediction_frame(self, frame):
+    if self.display:
+      cv2.imshow('prediction frame', frame)
+    if self.record:
+      self.prediction_video_out.write(frame)
 
   @property
   def actual_fps(self):

@@ -91,4 +91,4 @@ class ActionResponseNetwork(object):
             '%09d Next action: %s' %
             (step, const.ACTION_DICT[int(next_action)]))
 
-        cv2.imshow('Predicted response', predicted_response)
+        cap.record_prediction_frame(predicted_response)
